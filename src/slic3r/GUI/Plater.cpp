@@ -8518,7 +8518,7 @@ void Plater::_calib_pa_select_added_objects() {
 }
 
 void Plater::calib_flowrate(int pass) {
-    if (pass != 1 && pass != 2)
+    if (pass != 1 && pass != 2 && pass != 3)
         return;
     const auto calib_name = wxString::Format(L"Flowrate Test - Pass%d", pass);
     new_project(false, false, calib_name);
@@ -8527,9 +8527,10 @@ void Plater::calib_flowrate(int pass) {
     
     if(pass == 1)
         add_model(false, (boost::filesystem::path(Slic3r::resources_dir()) / "calib" / "filament_flow" / "flowrate-test-pass1.3mf").string());
-    else
+    else if(pass == 2)
         add_model(false, (boost::filesystem::path(Slic3r::resources_dir()) / "calib" / "filament_flow" / "flowrate-test-pass2.3mf").string());
-
+    else if(pass == 3)
+        add_model(false, (boost::filesystem::path(Slic3r::resources_dir()) / "calib" / "filament_flow" / "flowrate-test-pass3.3mf").string());
     auto print_config = &wxGetApp().preset_bundle->prints.get_edited_preset().config;
     auto printerConfig = &wxGetApp().preset_bundle->printers.get_edited_preset().config;
     auto filament_config = &wxGetApp().preset_bundle->filaments.get_edited_preset().config;
@@ -8590,7 +8591,10 @@ void Plater::calib_flowrate(int pass) {
         if (obj_name[0] == 'm')
             obj_name[0] = '-';
         auto modifier = stof(obj_name);
-        _obj->config.set_key_value("print_flow_ratio", new ConfigOptionFloat(1.0f + modifier/100.f));
+        if (pass == 1 || pass == 2)
+            _obj->config.set_key_value("print_flow_ratio", new ConfigOptionFloat(1.0f + modifier/100.f));
+        else if (pass == 3)
+            _obj->config.set_key_value("print_flow_ratio", new ConfigOptionFloat(1.0f + modifier/2.0f/100.f));
     }
 
     print_config->set_key_value("layer_height", new ConfigOptionFloat(layer_height));
